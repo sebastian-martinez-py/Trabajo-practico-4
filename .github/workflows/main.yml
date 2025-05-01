@@ -11,9 +11,6 @@ on:
 jobs:
   retraining_model:
     runs-on: ubuntu-latest
-    container: docker://dvcorg/cml:latest
-    env:
-      repo_token: ${{ secrets.GITHUBTOKEN }}
     steps:
       - uses: actions/checkout@v2
 
@@ -24,25 +21,13 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Execute the training model
-        run: |
-          python3 retraining.py
-
-      - name: Generating report
-        run: |
-          echo "## Model metrics" > report.md
-          cat metrics.txt >> report.md
-          echo "## Data visualization" >> report.md
-          cml-publish feature_importance.png --md >> report.md
-          cml-send-comment report.md
-
+        run: python3 retraining.py
 
   build_and_push_docker_image:
     needs: retraining_model
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
